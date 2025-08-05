@@ -37,11 +37,11 @@ git push heroku main
 
 ## 🛠️ Tecnologias
 
-- Python 3.11+
-- Streamlit ≥1.36.0
-- Pandas ≥2.2.0
-- Plotly ≥5.20.0
-- OpenPyXL ≥3.1.5
+- Python 3.12
+- Streamlit (latest)
+- Pandas (latest)
+- Plotly (latest)
+- OpenPyXL (latest)
 
 ## 🎯 Como Usar Online
 
