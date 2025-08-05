@@ -191,7 +191,7 @@ def create_sidebar():
     # Informações do sistema
     if st.session_state.trello_data:
         st.sidebar.markdown("---")
-        st.sidebar.header("ℹ️ Informações")
+        st.sidebar.header("ℹ️ Informações do Board")
         
         board_name = st.session_state.trello_data.get('name', 'Desconhecido')
         st.sidebar.info(f"**Board:** {board_name}")
@@ -199,8 +199,27 @@ def create_sidebar():
         total_cards = len(st.session_state.trello_data.get('cards', []))
         total_members = len(st.session_state.trello_data.get('members', []))
         
-        st.sidebar.metric("Cards Totais", total_cards)
+        st.sidebar.metric("Cards Totais no Board", total_cards)
         st.sidebar.metric("Membros", total_members)
+        
+        # Informações sobre filtragem
+        if st.session_state.task_reports:
+            st.sidebar.markdown("---")
+            st.sidebar.header("📊 Filtros Aplicados")
+            
+            # Contar cards únicos nos reports
+            unique_card_ids = set()
+            for report in st.session_state.task_reports:
+                unique_card_ids.add(report.task_id)
+            
+            cards_no_periodo = len(unique_card_ids)
+            cards_filtrados = len(st.session_state.task_reports)
+            
+            st.sidebar.metric("Cards no Período", cards_no_periodo)
+            st.sidebar.metric("Reports Gerados", cards_filtrados)
+            
+            if cards_no_periodo != cards_filtrados:
+                st.sidebar.info(f"💡 Diferença entre cards ({cards_no_periodo}) e reports ({cards_filtrados}) é normal quando há múltiplos colaboradores por tarefa.")
         
         # Botão de reprocessamento
         if st.sidebar.button("🔄 Reprocessar Dados", help="Reprocessa os dados com filtros atuais"):
@@ -325,13 +344,39 @@ def display_header():
     """, unsafe_allow_html=True)
 
 def display_metrics_overview():
-    """Exibe métricas principais."""
+    """Exibe métricas principais com informações detalhadas."""
     if not st.session_state.report_summary:
         return
         
     summary = st.session_state.report_summary
     
     st.header("📈 Visão Geral")
+    
+    # Métrica de debug sobre filtragem
+    with st.expander("🔍 Detalhes da Filtragem", expanded=False):
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            total_board_cards = len(st.session_state.trello_data.get('cards', []))
+            st.metric("Cards no Board", total_board_cards)
+            
+        with col2:
+            # Contar cards únicos que passaram pelo filtro
+            unique_card_ids = set()
+            for report in st.session_state.task_reports:
+                unique_card_ids.add(report.task_id)
+            cards_no_periodo = len(unique_card_ids)
+            st.metric("Cards no Período", cards_no_periodo)
+            
+        with col3:
+            reduction_percentage = ((total_board_cards - cards_no_periodo) / total_board_cards * 100) if total_board_cards > 0 else 0
+            st.metric("Redução do Filtro", f"{reduction_percentage:.1f}%")
+        
+        if cards_no_periodo != summary.total_tasks:
+            st.info(f"💡 **Explicação:** {cards_no_periodo} cards únicos geram {summary.total_tasks} tarefas únicas após deduplicação por colaboradores.")
+        
+        start_date, end_date = st.session_state.date_range
+        st.write(f"**Período analisado:** {start_date.strftime('%d/%m/%Y')} até {end_date.strftime('%d/%m/%Y')}")
     
     # Métricas principais
     col1, col2, col3, col4, col5 = st.columns(5)
@@ -340,7 +385,7 @@ def display_metrics_overview():
         st.metric(
             "Total de Tarefas",
             summary.total_tasks,
-            help="Número total de tarefas no período"
+            help="Número total de tarefas únicas no período (após deduplicação)"
         )
     
     with col2:

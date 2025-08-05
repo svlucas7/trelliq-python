@@ -3,7 +3,7 @@ Processador de dados do Trello - Replica a lógica completa do sistema TypeScrip
 """
 
 import pandas as pd
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from typing import Dict, List, Any, Optional, Tuple
 import logging
 from dataclasses import dataclass
@@ -115,7 +115,7 @@ class TrelloDataProcessor:
     
     def filter_cards_by_date_range(self, cards: List[Dict], start_date: date, end_date: date) -> List[Dict]:
         """
-        Filtra cards por período de data.
+        Filtra cards por período de data com lógica mais restritiva.
         
         Args:
             cards: Lista de cards do Trello
@@ -125,7 +125,7 @@ class TrelloDataProcessor:
         Returns:
             Lista de cards filtrados
         """
-        logger.info(f"=== FILTRO POR DATA ===")
+        logger.info(f"=== FILTRO POR DATA (LÓGICA MELHORADA) ===")
         logger.info(f"Período: {start_date.strftime('%d/%m/%Y')} até {end_date.strftime('%d/%m/%Y')}")
         logger.info(f"Total de cards no board: {len(cards)}")
         
@@ -136,32 +136,68 @@ class TrelloDataProcessor:
             if card.get('closed', False):
                 logger.info(f"📦 Card ARQUIVADO ignorado: \"{card.get('name', 'N/A')}\"")
                 continue
-                
-            # Verificar data da última atividade
-            last_activity_str = card.get('dateLastActivity')
-            if not last_activity_str:
-                logger.warning(f"⚠️ Card sem dateLastActivity: \"{card.get('name', 'N/A')}\"")
-                continue
-                
-            try:
-                # Parse da data (formato ISO do Trello)
-                if last_activity_str.endswith('Z'):
-                    last_activity = datetime.fromisoformat(last_activity_str.replace('Z', '+00:00')).date()
-                else:
-                    last_activity = datetime.fromisoformat(last_activity_str).date()
+            
+            include_card = False
+            inclusion_reason = ""
+            
+            # Verificar data de criação (se foi criado no período)
+            created_date_str = card.get('dateLastActivity')  # Usar como proxy para criação
+            if created_date_str:
+                try:
+                    if created_date_str.endswith('Z'):
+                        created_date = datetime.fromisoformat(created_date_str.replace('Z', '+00:00')).date()
+                    else:
+                        created_date = datetime.fromisoformat(created_date_str).date()
                     
-                # Verificar se está no período
-                is_in_range = start_date <= last_activity <= end_date
-                
-                logger.info(f"Card \"{card.get('name', 'N/A')}\": última atividade {last_activity.strftime('%d/%m/%Y')} - No período: {is_in_range}")
-                
-                if is_in_range:
-                    filtered_cards.append(card)
+                    if start_date <= created_date <= end_date:
+                        include_card = True
+                        inclusion_reason = f"criada em {created_date.strftime('%d/%m/%Y')}"
+                        
+                except (ValueError, TypeError):
+                    pass
+            
+            # Verificar data de vencimento (se tem prazo no período)
+            due_date_str = card.get('due')
+            if due_date_str and not include_card:
+                try:
+                    if due_date_str.endswith('Z'):
+                        due_date = datetime.fromisoformat(due_date_str.replace('Z', '+00:00')).date()
+                    else:
+                        due_date = datetime.fromisoformat(due_date_str).date()
                     
-            except (ValueError, TypeError) as e:
-                logger.error(f"Erro ao processar data do card \"{card.get('name', 'N/A')}\": {e}")
+                    if start_date <= due_date <= end_date:
+                        include_card = True
+                        inclusion_reason = f"prazo em {due_date.strftime('%d/%m/%Y')}"
+                        
+                except (ValueError, TypeError):
+                    pass
+            
+            # Verificar última atividade significativa (como fallback, mas mais restritivo)
+            if not include_card:
+                last_activity_str = card.get('dateLastActivity')
+                if last_activity_str:
+                    try:
+                        if last_activity_str.endswith('Z'):
+                            last_activity = datetime.fromisoformat(last_activity_str.replace('Z', '+00:00')).date()
+                        else:
+                            last_activity = datetime.fromisoformat(last_activity_str).date()
+                        
+                        # Só incluir se a última atividade foi muito recente (últimos 7 dias do período)
+                        recent_threshold = end_date - timedelta(days=7)
+                        if recent_threshold <= last_activity <= end_date:
+                            include_card = True
+                            inclusion_reason = f"atividade recente em {last_activity.strftime('%d/%m/%Y')}"
+                            
+                    except (ValueError, TypeError):
+                        pass
+            
+            if include_card:
+                filtered_cards.append(card)
+                logger.info(f"✅ Card INCLUÍDO: \"{card.get('name', 'N/A')}\" - {inclusion_reason}")
+            else:
+                logger.info(f"❌ Card EXCLUÍDO: \"{card.get('name', 'N/A')}\" - fora do período ou sem atividade relevante")
                 
-        logger.info(f"Total de cards no período: {len(filtered_cards)}")
+        logger.info(f"Total de cards no período (filtro melhorado): {len(filtered_cards)}")
         logger.info("======================")
         
         return filtered_cards
