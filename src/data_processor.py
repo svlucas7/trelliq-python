@@ -113,21 +113,35 @@ class TrelloDataProcessor:
             
         return len(errors) == 0, errors
     
-    def filter_cards_by_date_range(self, cards: List[Dict], start_date: date, end_date: date) -> List[Dict]:
+    def filter_cards_by_date_range(self, cards: List[Dict], start_date: date, end_date: date, lists: List[Dict] = None) -> List[Dict]:
         """
-        Filtra cards por período de data.
+        Filtra cards por período de data com lógica inteligente.
+        
+        Para tarefas concluídas: verifica due date no período
+        Para tarefas em andamento: verifica última atividade no período
         
         Args:
             cards: Lista de cards do Trello
             start_date: Data de início
             end_date: Data de fim
+            lists: Lista de listas do board (opcional, para identificar listas concluídas)
             
         Returns:
             Lista de cards filtrados
         """
-        logger.info(f"=== FILTRO POR DATA ===")
+        logger.info(f"=== FILTRO POR DATA INTELIGENTE ===")
         logger.info(f"Período: {start_date.strftime('%d/%m/%Y')} até {end_date.strftime('%d/%m/%Y')}")
         logger.info(f"Total de cards no board: {len(cards)}")
+        
+        # Identificar listas de tarefas concluídas
+        completed_list_ids = set()
+        if lists:
+            for lista in lists:
+                list_name_upper = lista['name'].upper().strip()
+                completed_keywords = ['FEITO', 'FEITOS', 'CONCLUÍ', 'FINALIZADO', 'COMPLETO', 'DONE', 'FINISHED']
+                if any(keyword in list_name_upper for keyword in completed_keywords):
+                    completed_list_ids.add(lista['id'])
+                    logger.info(f"📋 Lista identificada como CONCLUÍDA: {lista['name']}")
         
         filtered_cards = []
         
@@ -137,10 +151,40 @@ class TrelloDataProcessor:
                 logger.info(f"📦 Card ARQUIVADO ignorado: \"{card.get('name', 'N/A')}\"")
                 continue
                 
-            # Verificar data da última atividade
+            card_name = card.get('name', 'N/A')
+            list_id = card.get('idList')
+            is_in_completed_list = list_id in completed_list_ids
+            
+            # Para tarefas em listas de CONCLUÍDAS: filtrar por due date
+            if is_in_completed_list:
+                due_date_str = card.get('due')
+                if due_date_str:
+                    try:
+                        if due_date_str.endswith('Z'):
+                            due_date = datetime.fromisoformat(due_date_str.replace('Z', '+00:00')).date()
+                        else:
+                            due_date = datetime.fromisoformat(due_date_str).date()
+                        
+                        # Se o due date está no período, incluir o card
+                        if start_date <= due_date <= end_date:
+                            filtered_cards.append(card)
+                            logger.info(f"✅ Card CONCLUÍDO \"{card_name}\": incluído por due date {due_date.strftime('%d/%m/%Y')} no período")
+                            continue
+                        else:
+                            logger.info(f"❌ Card CONCLUÍDO \"{card_name}\": due date {due_date.strftime('%d/%m/%Y')} fora do período")
+                            continue
+                            
+                    except (ValueError, TypeError) as e:
+                        logger.error(f"Erro ao processar due date do card \"{card_name}\": {e}")
+                        
+                # Se não tem due date, não incluir cards concluídos sem data de vencimento
+                logger.info(f"❌ Card CONCLUÍDO \"{card_name}\": sem due date, não incluído no período")
+                continue
+            
+            # Para tarefas EM ANDAMENTO: filtrar por última atividade
             last_activity_str = card.get('dateLastActivity')
             if not last_activity_str:
-                logger.warning(f"⚠️ Card sem dateLastActivity: \"{card.get('name', 'N/A')}\"")
+                logger.warning(f"⚠️ Card sem dateLastActivity: \"{card_name}\"")
                 continue
                 
             try:
@@ -153,13 +197,14 @@ class TrelloDataProcessor:
                 # Verificar se está no período
                 is_in_range = start_date <= last_activity <= end_date
                 
-                logger.info(f"Card \"{card.get('name', 'N/A')}\": última atividade {last_activity.strftime('%d/%m/%Y')} - No período: {is_in_range}")
-                
                 if is_in_range:
                     filtered_cards.append(card)
+                    logger.info(f"✅ Card EM ANDAMENTO \"{card_name}\": incluído por última atividade {last_activity.strftime('%d/%m/%Y')} no período")
+                else:
+                    logger.info(f"❌ Card EM ANDAMENTO \"{card_name}\": última atividade {last_activity.strftime('%d/%m/%Y')} fora do período")
                     
             except (ValueError, TypeError) as e:
-                logger.error(f"Erro ao processar data do card \"{card.get('name', 'N/A')}\": {e}")
+                logger.error(f"Erro ao processar data do card \"{card_name}\": {e}")
                 
         logger.info(f"Total de cards no período: {len(filtered_cards)}")
         logger.info("======================")
@@ -412,7 +457,7 @@ class TrelloDataProcessor:
         lists = data.get('lists', [])
         members = data.get('members', [])
         
-        filtered_cards = self.filter_cards_by_date_range(cards, start_date, end_date)
+        filtered_cards = self.filter_cards_by_date_range(cards, start_date, end_date, lists)
         reports = []
         
         logger.info('=== GERAÇÃO DE RELATÓRIOS DE TAREFAS ===')
