@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class TaskReport:
     """Relatório de uma tarefa individual."""
+    task_id: str  # ID único da tarefa
     collaborator_name: str
     task_name: str
     list_name: str
@@ -429,6 +430,7 @@ class TrelloDataProcessor:
                 due_date_str = self._format_due_date(card.get('due'))
                 
                 reports.append(TaskReport(
+                    task_id=card.get('id', ''),
                     collaborator_name='Não atribuído',
                     task_name=card.get('name', ''),
                     list_name=list_name,
@@ -482,6 +484,7 @@ class TrelloDataProcessor:
                         due_date_str = self._format_due_date(card.get('due'))
                         
                         reports.append(TaskReport(
+                            task_id=card.get('id', ''),
                             collaborator_name=collaborator_names,
                             task_name=card.get('name', ''),
                             list_name=list_name,
@@ -507,6 +510,7 @@ class TrelloDataProcessor:
                     due_date_str = self._format_due_date(card.get('due'))
                     
                     reports.append(TaskReport(
+                        task_id=card.get('id', ''),
                         collaborator_name=member['fullName'],
                         task_name=card.get('name', ''),
                         list_name=list_name,
@@ -694,6 +698,7 @@ class TrelloDataProcessor:
                         
                     # Criar uma cópia da task para cada colaborador individual
                     task_copy = TaskReport(
+                        task_id=task.task_id,
                         collaborator_name=nome,
                         task_name=task.task_name,
                         list_name=task.list_name,
