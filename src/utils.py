@@ -1,5 +1,6 @@
 """
-Utilitários gerais para o sistema Trelliq.
+Utilitários gerais para o sistema Trelliq Python.
+Funções auxiliares para formatação, validação e criação de elementos visuais.
 """
 
 import pandas as pd
@@ -11,6 +12,31 @@ import streamlit as st
 from datetime import datetime
 import base64
 import io
+
+def format_number(value: int) -> str:
+    """Formata número para exibição com separadores."""
+    return f"{value:,}".replace(",", ".")
+
+def format_percentage(value: float) -> str:
+    """Formata percentual para exibição."""
+    return f"{value:.1f}%"
+
+def create_download_link(df: pd.DataFrame, filename: str, link_text: str = "📥 Download") -> str:
+    """
+    Cria link de download para DataFrame como CSV.
+    
+    Args:
+        df: DataFrame para download
+        filename: Nome do arquivo
+        link_text: Texto do link
+        
+    Returns:
+        HTML do link de download
+    """
+    csv = df.to_csv(index=False)
+    b64 = base64.b64encode(csv.encode()).decode()
+    href = f'<a href="data:file/csv;base64,{b64}" download="{filename}">{link_text}</a>'
+    return href
 
 def create_status_pie_chart(status_data: Dict[str, int], title: str = "Distribuição de Status") -> go.Figure:
     """
