@@ -552,25 +552,16 @@ class TrelloDataProcessor:
         logger.info('=== GERAÇÃO DE RESUMO DO RELATÓRIO ===')
         logger.info(f'Total de task reports para resumo: {len(task_reports)}')
         
-        # Deduplicate tasks by task_id to avoid counting the same task multiple times
-        unique_tasks_map = {}
-        for task in task_reports:
-            if task.task_id not in unique_tasks_map:
-                unique_tasks_map[task.task_id] = task
-        
-        unique_tasks = list(unique_tasks_map.values())
-        logger.info(f'Total de tarefas únicas para resumo: {len(unique_tasks)}')
-        
-        total_tasks = len(unique_tasks)
-        completed_tasks = len([t for t in unique_tasks if t.status == 'Concluída'])
-        in_progress_tasks = len([t for t in unique_tasks if t.status == 'Em Andamento'])
-        late_tasks = len([t for t in unique_tasks if t.status == 'Atrasada'])
+        total_tasks = len(task_reports)
+        completed_tasks = len([t for t in task_reports if t.status == 'Concluída'])
+        in_progress_tasks = len([t for t in task_reports if t.status == 'Em Andamento'])
+        late_tasks = len([t for t in task_reports if t.status == 'Atrasada'])
         overdue_tasks = late_tasks  # Atrasadas são as mesmas que em atraso
-        blocked_tasks = len([t for t in unique_tasks if t.status == 'Bloqueada'])
+        blocked_tasks = len([t for t in task_reports if t.status == 'Bloqueada'])
         
         # Contar colaboradores únicos (deduplicar colaboradores agrupados)
         unique_collaborators = set()
-        for task in unique_tasks:
+        for task in task_reports:
             if ',' in task.collaborator_name:
                 # Se for colaborador agrupado, adicionar cada nome individualmente
                 for name in task.collaborator_name.split(','):
@@ -588,28 +579,21 @@ class TrelloDataProcessor:
             responsaveis = [r.nome for r in grupo_obj.responsaveis]
             group_tasks = [t for t in task_reports if t.grupo == grupo]
             
-            # Deduplicate group tasks by task_id to avoid counting the same task multiple times
-            unique_group_tasks_map = {}
-            for task in group_tasks:
-                if task.task_id not in unique_group_tasks_map:
-                    unique_group_tasks_map[task.task_id] = task
-            unique_group_tasks = list(unique_group_tasks_map.values())
+            completed = len([t for t in group_tasks if t.status == 'Concluída'])
+            in_progress = len([t for t in group_tasks if t.status == 'Em Andamento'])
+            late = len([t for t in group_tasks if t.status == 'Atrasada'])
+            blocked = len([t for t in group_tasks if t.status == 'Bloqueada'])
             
-            completed = len([t for t in unique_group_tasks if t.status == 'Concluída'])
-            in_progress = len([t for t in unique_group_tasks if t.status == 'Em Andamento'])
-            late = len([t for t in unique_group_tasks if t.status == 'Atrasada'])
-            blocked = len([t for t in unique_group_tasks if t.status == 'Bloqueada'])
-            
-            completed_with_due = [t for t in unique_group_tasks if t.status == 'Concluída' and t.due_date != 'Não definida']
+            completed_with_due = [t for t in group_tasks if t.status == 'Concluída' and t.due_date != 'Não definida']
             on_time = len([t for t in completed_with_due if t.days_late == 0])
             late_deliv = len([t for t in completed_with_due if t.days_late > 0])
             
-            logger.info(f"📊 {grupo}: {len(unique_group_tasks)} tarefas únicas ({completed} concluídas, {in_progress} em andamento, {late} atrasadas)")
+            logger.info(f"📊 {grupo}: {len(group_tasks)} tarefas total ({completed} concluídas, {in_progress} em andamento, {late} atrasadas)")
             
             group_summaries.append(GroupReportSummary(
                 grupo=grupo,
                 responsaveis=responsaveis,
-                total_tasks=len(unique_group_tasks),
+                total_tasks=len(group_tasks),
                 completed_tasks=completed,
                 in_progress_tasks=in_progress,
                 late_tasks=late,
@@ -621,28 +605,21 @@ class TrelloDataProcessor:
         # Adicionar grupo "Sem Grupo" se houver tarefas sem grupo
         sem_grupo_tasks = [t for t in task_reports if not t.grupo]
         if sem_grupo_tasks:
-            # Deduplicate sem grupo tasks by task_id to avoid counting the same task multiple times
-            unique_sem_grupo_tasks_map = {}
-            for task in sem_grupo_tasks:
-                if task.task_id not in unique_sem_grupo_tasks_map:
-                    unique_sem_grupo_tasks_map[task.task_id] = task
-            unique_sem_grupo_tasks = list(unique_sem_grupo_tasks_map.values())
+            completed = len([t for t in sem_grupo_tasks if t.status == 'Concluída'])
+            in_progress = len([t for t in sem_grupo_tasks if t.status == 'Em Andamento'])
+            late = len([t for t in sem_grupo_tasks if t.status == 'Atrasada'])
+            blocked = len([t for t in sem_grupo_tasks if t.status == 'Bloqueada'])
             
-            completed = len([t for t in unique_sem_grupo_tasks if t.status == 'Concluída'])
-            in_progress = len([t for t in unique_sem_grupo_tasks if t.status == 'Em Andamento'])
-            late = len([t for t in unique_sem_grupo_tasks if t.status == 'Atrasada'])
-            blocked = len([t for t in unique_sem_grupo_tasks if t.status == 'Bloqueada'])
-            
-            completed_with_due = [t for t in unique_sem_grupo_tasks if t.status == 'Concluída' and t.due_date != 'Não definida']
+            completed_with_due = [t for t in sem_grupo_tasks if t.status == 'Concluída' and t.due_date != 'Não definida']
             on_time = len([t for t in completed_with_due if t.days_late == 0])
             late_deliv = len([t for t in completed_with_due if t.days_late > 0])
             
-            logger.info(f"📊 Sem Grupo: {len(unique_sem_grupo_tasks)} tarefas únicas ({completed} concluídas, {in_progress} em andamento, {late} atrasadas)")
+            logger.info(f"📊 Sem Grupo: {len(sem_grupo_tasks)} tarefas total ({completed} concluídas, {in_progress} em andamento, {late} atrasadas)")
             
             group_summaries.append(GroupReportSummary(
                 grupo='Sem Grupo',
                 responsaveis=[],
-                total_tasks=len(unique_sem_grupo_tasks),
+                total_tasks=len(sem_grupo_tasks),
                 completed_tasks=completed,
                 in_progress_tasks=in_progress,
                 late_tasks=late,
@@ -738,11 +715,9 @@ class TrelloDataProcessor:
             blocked_tasks = len([t for t in unique_tasks if t.status == 'Bloqueada'])
             pending_tasks = total_tasks - completed_tasks
             
-            # Taxa de conclusão em percentual (0-100)
-            completion_rate = (completed_tasks / total_tasks * 100) if total_tasks > 0 else 0
+            completion_rate = (completed_tasks / total_tasks) if total_tasks > 0 else 0
             
-            # Média de atraso apenas para tarefas que estão realmente atrasadas (não concluídas)
-            late_days = [t.days_late for t in unique_tasks if t.days_late > 0 and t.status in ['Atrasada', 'Em Andamento']]
+            late_days = [t.days_late for t in unique_tasks if t.days_late > 0]
             average_days_late = (sum(late_days) / len(late_days)) if late_days else 0
             
             logger.info(f"👤 {collaborator_name}: {total_tasks} tarefas únicas ({completed_tasks} concluídas - {(completion_rate * 100):.1f}%)")
