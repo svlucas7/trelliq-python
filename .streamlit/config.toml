@@ -6,7 +6,6 @@ textColor = "#2C3E50"
 
 [server]
 headless = true
-port = $PORT
 enableCORS = false
 enableXsrfProtection = false
 
