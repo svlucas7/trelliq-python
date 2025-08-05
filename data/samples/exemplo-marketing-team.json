@@ -1,0 +1,233 @@
+{
+  "cards": [
+    {
+      "id": "64a1b2c3d4e5f6789012345a",
+      "name": "Criar conteúdo para redes sociais - Campanha Verão",
+      "desc": "Desenvolver posts para Instagram e Facebook da campanha de verão, incluindo stories e feed posts",
+      "list": {
+        "id": "list1",
+        "name": "Em Progresso"
+      },
+      "members": [
+        {
+          "id": "member1",
+          "username": "lucas.silva",
+          "fullName": "Lucas Silva"
+        },
+        {
+          "id": "member2", 
+          "username": "maria.santos",
+          "fullName": "Maria Santos"
+        }
+      ],
+      "dateLastActivity": "2024-01-15T10:30:00.000Z",
+      "due": "2024-01-20T18:00:00.000Z",
+      "closed": false,
+      "url": "https://trello.com/c/sample1"
+    },
+    {
+      "id": "64a1b2c3d4e5f6789012345b",
+      "name": "Análise de métricas Q4 2023",
+      "desc": "Compilar e analisar métricas de performance do último trimestre para relatório executivo",
+      "list": {
+        "id": "list2",
+        "name": "Concluído"
+      },
+      "members": [
+        {
+          "id": "member3",
+          "username": "rafael.souza", 
+          "fullName": "Rafael Souza"
+        }
+      ],
+      "dateLastActivity": "2024-01-10T14:20:00.000Z",
+      "due": "2024-01-12T17:00:00.000Z",
+      "closed": false,
+      "url": "https://trello.com/c/sample2"
+    },
+    {
+      "id": "64a1b2c3d4e5f6789012345c",
+      "name": "Planejamento estratégico 2024",
+      "desc": "Definir metas e estratégias para o ano de 2024, incluindo orçamentos e cronogramas",
+      "list": {
+        "id": "list3",
+        "name": "A Fazer"
+      },
+      "members": [
+        {
+          "id": "member4",
+          "username": "flavia.coordenacao",
+          "fullName": "Flávia Coordenação"
+        },
+        {
+          "id": "member5",
+          "username": "equipe.gestao",
+          "fullName": "Equipe Gestão"
+        }
+      ],
+      "dateLastActivity": "2024-01-08T09:15:00.000Z",
+      "due": "2024-01-25T12:00:00.000Z", 
+      "closed": false,
+      "url": "https://trello.com/c/sample3"
+    },
+    {
+      "id": "64a1b2c3d4e5f6789012345d",
+      "name": "Configuração de campanhas Google Ads",
+      "desc": "Criar e configurar campanhas publicitárias no Google Ads para novos produtos",
+      "list": {
+        "id": "list4",
+        "name": "Revisão"
+      },
+      "members": [
+        {
+          "id": "member6",
+          "username": "ana.costa",
+          "fullName": "Ana Costa"
+        },
+        {
+          "id": "member7",
+          "username": "pedro.lima",
+          "fullName": "Pedro Lima"
+        }
+      ],
+      "dateLastActivity": "2024-01-14T16:45:00.000Z",
+      "due": "2024-01-18T15:00:00.000Z",
+      "closed": false,
+      "url": "https://trello.com/c/sample4"
+    },
+    {
+      "id": "64a1b2c3d4e5f6789012345e",
+      "name": "Relatório de engajamento Instagram",
+      "desc": "Compilar dados de engajamento do Instagram do último mês e criar apresentação",
+      "list": {
+        "id": "list2",
+        "name": "Concluído"
+      },
+      "members": [
+        {
+          "id": "member8",
+          "username": "julia.martins",
+          "fullName": "Julia Martins"
+        },
+        {
+          "id": "member9",
+          "username": "bruno.alves",
+          "fullName": "Bruno Alves"
+        }
+      ],
+      "dateLastActivity": "2024-01-12T11:30:00.000Z",
+      "due": "2024-01-15T10:00:00.000Z",
+      "closed": false,
+      "url": "https://trello.com/c/sample5"
+    },
+    {
+      "id": "64a1b2c3d4e5f6789012345f",
+      "name": "Desenvolvimento de newsletter semanal",
+      "desc": "Criar template e conteúdo para newsletter semanal da empresa",
+      "list": {
+        "id": "list1",
+        "name": "Em Progresso"
+      },
+      "members": [
+        {
+          "id": "member10",
+          "username": "carla.ferreira",
+          "fullName": "Carla Ferreira"
+        }
+      ],
+      "dateLastActivity": "2024-01-16T08:20:00.000Z",
+      "due": "2024-01-22T12:00:00.000Z",
+      "closed": false,
+      "url": "https://trello.com/c/sample6"
+    }
+  ],
+  "members": [
+    {
+      "id": "member1",
+      "username": "lucas.silva",
+      "fullName": "Lucas Silva",
+      "initials": "LS"
+    },
+    {
+      "id": "member2",
+      "username": "maria.santos", 
+      "fullName": "Maria Santos",
+      "initials": "MS"
+    },
+    {
+      "id": "member3",
+      "username": "rafael.souza",
+      "fullName": "Rafael Souza", 
+      "initials": "RS"
+    },
+    {
+      "id": "member4",
+      "username": "flavia.coordenacao",
+      "fullName": "Flávia Coordenação",
+      "initials": "FC"
+    },
+    {
+      "id": "member5",
+      "username": "equipe.gestao",
+      "fullName": "Equipe Gestão",
+      "initials": "EG"
+    },
+    {
+      "id": "member6",
+      "username": "ana.costa",
+      "fullName": "Ana Costa",
+      "initials": "AC"
+    },
+    {
+      "id": "member7",
+      "username": "pedro.lima",
+      "fullName": "Pedro Lima",
+      "initials": "PL"
+    },
+    {
+      "id": "member8",
+      "username": "julia.martins",
+      "fullName": "Julia Martins",
+      "initials": "JM"
+    },
+    {
+      "id": "member9",
+      "username": "bruno.alves",
+      "fullName": "Bruno Alves", 
+      "initials": "BA"
+    },
+    {
+      "id": "member10",
+      "username": "carla.ferreira",
+      "fullName": "Carla Ferreira",
+      "initials": "CF"
+    }
+  ],
+  "lists": [
+    {
+      "id": "list1",
+      "name": "Em Progresso",
+      "closed": false
+    },
+    {
+      "id": "list2", 
+      "name": "Concluído",
+      "closed": false
+    },
+    {
+      "id": "list3",
+      "name": "A Fazer",
+      "closed": false
+    },
+    {
+      "id": "list4",
+      "name": "Revisão", 
+      "closed": false
+    }
+  ],
+  "board": {
+    "id": "board1",
+    "name": "Marketing Team - Q1 2024",
+    "desc": "Board de tarefas da equipe de marketing para o primeiro trimestre de 2024"
+  }
+}
