@@ -48,9 +48,10 @@ GRUPOS_MARKETING = [
     ),
     GrupoMarketing(
         name='Grupo 3',
-        responsaveis=[
-            Responsavel(username='samuelpiske1', nome='Samuel')
-        ],
+            responsaveis=[
+                Responsavel(username='samuelpiske1', nome='Samuel'),
+                Responsavel(username='mateussilva674', nome='Mateus Monteiro')
+            ],
         etapas_abertura=['PROCESSO DE GRAVAÇÃO', 'EDIÇÃO'],
         etapas_finalizacao=['EM PROCESSO DE MONTAGEM', 'EM PROCESSO DE ENVIO'],
         etapa_feito=['FEITOS', 'FEITO'],
